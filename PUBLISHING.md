@@ -15,7 +15,7 @@ Before publishing:
 5. Run the **Engine Release** GitHub Actions workflow first. It must publish:
 
 ```txt
-https://github.com/ihxnnxs/opencode-voice/releases/download/engine-whispercpp-v1/registry.json
+https://github.com/ihxnnxs/opencode-voice/releases/download/v0.1.0/registry.json
 ```
 
 6. Confirm the registry contains assets for the target release platforms.

@@ -11,7 +11,7 @@ function parseArgs() {
 const args = parseArgs();
 const dir = path.resolve(args.dir || "dist/engines");
 const repo = args.repo || process.env.GITHUB_REPOSITORY || "ihxnnxs/opencode-voice";
-const tag = args.tag || process.env.ENGINE_RELEASE_TAG || "engine-whispercpp-v1";
+const tag = args.tag || process.env.ENGINE_RELEASE_TAG || "v0.1.0";
 const version = args.version || process.env.WHISPER_CPP_REF || tag;
 const assets = {};
 

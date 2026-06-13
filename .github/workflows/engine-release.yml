@@ -6,7 +6,7 @@ on:
       release_tag:
         description: GitHub release tag for engine assets
         required: true
-        default: engine-whispercpp-v1
+        default: v0.1.0
       whisper_cpp_ref:
         description: whisper.cpp tag or commit
         required: true
