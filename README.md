@@ -10,6 +10,8 @@
 <p align="center">Local speech-to-text for the OpenCode TUI.</p>
 <p align="center">
   <img alt="status" src="https://img.shields.io/badge/status-mvp-orange?style=flat-square" />
+  <a href="https://www.npmjs.com/package/@hxnnxs/opencode-voice"><img alt="npm version" src="https://img.shields.io/npm/v/@hxnnxs/opencode-voice?style=flat-square" /></a>
+  <a href="https://www.npmjs.com/package/@hxnnxs/opencode-voice"><img alt="npm downloads" src="https://img.shields.io/npm/dm/@hxnnxs/opencode-voice?style=flat-square" /></a>
   <img alt="license" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" />
   <img alt="opencode" src="https://img.shields.io/badge/opencode-%3E%3D1.17.4-black?style=flat-square" />
   <img alt="stt" src="https://img.shields.io/badge/STT-local_whisper.cpp-purple?style=flat-square" />
