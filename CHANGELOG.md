@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here.
 
+## 0.1.9 - 2026-06-21
+
+### Fixed
+
+- Rebuilt the managed Windows `whisper-cli.exe` engine asset as a static MinGW binary so clean Windows installs do not need the Visual C++ runtime DLLs.
+- Fixed managed engine path handling so explicit `downloadDir` and Windows platform overrides are honored consistently.
+- Added streaming timeout protection and clearer VC++ runtime diagnostics to managed engine downloads and probes.
+
 ## 0.1.8 - 2026-06-21
 
 ### Fixed
