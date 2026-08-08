@@ -435,6 +435,7 @@ const WHISPER_LANGUAGES = [
     ["Yiddish", "yi"],
     ["Yoruba", "yo"],
     ["Chinese", "zh"],
+    ["Cantonese", "yue"],
     ["Zulu", "zu"],
 ];
 

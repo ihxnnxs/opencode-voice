@@ -93,12 +93,17 @@ Available now through `whisper.cpp`:
 
 | Model                | Size   | Notes                         |
 | -------------------- | ------ | ----------------------------- |
+| Whisper Tiny Q5_1    | 31 MB  | fastest, lowest accuracy      |
+| Whisper Base Q5_1    | 57 MB  | small multilingual option     |
+| Whisper Small Q5_1   | 181 MB | compact Small                 |
 | Whisper Small        | 465 MB | default, multilingual         |
-| Whisper Medium Q4_1  | 469 MB | better accuracy               |
+| Whisper Medium Q4_1  | 469 MB | Handy-compatible quantization |
+| Whisper Medium Q5_0  | 514 MB | higher-quality multilingual   |
+| Whisper Turbo Q5_0   | 547 MB | compact large-v3 Turbo        |
 | Whisper Turbo        | 1.5 GB | large, faster than full large |
 | Whisper Large Q5_0   | 1.0 GB | accurate, slower              |
 
-Model downloads support resume, retry, progress, and SHA256 verification.
+Model downloads support resume, retry, progress, and SHA256 verification. The standard Whisper variants offered by Handy are available here in `whisper.cpp` GGML form, alongside compact quantizations. Handy's other catalog entries use `transcribe-cpp` architectures such as Parakeet, Moonshine, Canary, GigaAM, and Breeze-ASR; they need a separate runtime and remain planned.
 
 Planned sidecar models:
 

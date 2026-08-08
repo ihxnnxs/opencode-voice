@@ -1,5 +1,9 @@
 # Changelog
 
+- Fixed Windows recorder startup to try DirectShow's enumerated microphone names when no microphone is configured. DirectShow's `audio=default` alias is retained only as a final fallback because it is not reliably supported.
+- Expanded recorder startup errors with the exact `ffmpeg` command and captured `ffmpeg` stderr to make Windows microphone failures actionable.
+- Added standard Handy-equivalent Whisper variants plus verified Tiny, Base, Small, Medium, and Turbo GGML quantizations to the local Whisper model picker.
+
 All notable changes to this project are documented here.
 
 ## 0.1.9 - 2026-06-21
