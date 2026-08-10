@@ -29,14 +29,22 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux-x64
+            sidecar_binary: sidecar/target/release/opencode-voice-transcribe
           - os: ubuntu-24.04-arm
             platform: linux-arm64
-          - os: macos-13
+            sidecar_binary: sidecar/target/release/opencode-voice-transcribe
+          - os: macos-14
             platform: darwin-x64
+            cmake_args: -DCMAKE_OSX_ARCHITECTURES=x86_64
+            rust_target: x86_64-apple-darwin
+            sidecar_binary: sidecar/target/x86_64-apple-darwin/release/opencode-voice-transcribe
           - os: macos-14
             platform: darwin-arm64
+            cmake_args: -DCMAKE_OSX_ARCHITECTURES=arm64
+            sidecar_binary: sidecar/target/release/opencode-voice-transcribe
           - os: windows-latest
             platform: win32-x64
+            sidecar_binary: sidecar/target/release/opencode-voice-transcribe.exe
 
     steps:
       - name: Checkout plugin
@@ -50,6 +58,10 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Add Rust cross-compilation target
+        if: matrix.rust_target
+        run: rustup target add ${{ matrix.rust_target }}
+
       - name: Install Linux build dependencies
         if: startsWith(matrix.platform, 'linux')
         run: sudo apt-get update && sudo apt-get install -y build-essential cmake git
@@ -59,7 +71,7 @@ jobs:
         shell: bash
 
       - name: Configure whisper.cpp
-        run: cmake -S vendor/whisper.cpp -B build/whisper.cpp -DCMAKE_BUILD_TYPE=Release -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=ON -DBUILD_SHARED_LIBS=OFF -DGGML_NATIVE=OFF
+        run: cmake -S vendor/whisper.cpp -B build/whisper.cpp -DCMAKE_BUILD_TYPE=Release -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=ON -DBUILD_SHARED_LIBS=OFF -DGGML_NATIVE=OFF ${{ matrix.cmake_args }}
         shell: bash
 
       - name: Build whisper-cli
@@ -71,11 +83,11 @@ jobs:
         shell: bash
 
       - name: Build transcribe-cpp sidecar
-        run: cargo build --manifest-path sidecar/Cargo.toml --release
+        run: cargo build --manifest-path sidecar/Cargo.toml --release ${{ matrix.rust_target && format('--target {0}', matrix.rust_target) || '' }}
         shell: bash
 
       - name: Package transcribe-cpp sidecar
-        run: node scripts/package-engine-asset.mjs --engine transcribe-cpp --command opencode-voice-transcribe --platform "${{ matrix.platform }}" --binary "sidecar/target/release/opencode-voice-transcribe${{ startsWith(matrix.platform, 'win32') && '.exe' || '' }}" --out dist/engines --version "$(cargo metadata --manifest-path sidecar/Cargo.toml --no-deps --format-version 1 | node -e 'let s=""; process.stdin.on("data", d => s += d).on("end", () => process.stdout.write(JSON.parse(s).packages[0].dependencies.find(d => d.name === "transcribe-cpp").req.replace("^", "")))')"
+        run: node scripts/package-engine-asset.mjs --engine transcribe-cpp --command opencode-voice-transcribe --platform "${{ matrix.platform }}" --binary "${{ matrix.sidecar_binary }}" --out dist/engines --version "$(cargo metadata --manifest-path sidecar/Cargo.toml --no-deps --format-version 1 | node -e 'let s=""; process.stdin.on("data", d => s += d).on("end", () => process.stdout.write(JSON.parse(s).packages[0].dependencies.find(d => d.name === "transcribe-cpp").req.replace("^", "")))')"
         shell: bash
 
       - name: Upload engine artifact
