@@ -26,7 +26,7 @@
 
 ---
 
-### Installation
+## Install
 
 One command through OpenCode:
 
@@ -34,7 +34,7 @@ One command through OpenCode:
 opencode plugin @hxnnxs/opencode-voice
 ```
 
-Restart OpenCode after installing. First launch downloads the managed `whisper.cpp` engine and then the selected model. The user does not install `whisper-cli` manually.
+Restart OpenCode after installing. On first launch, choose a model. The plugin downloads its required local runtime and model weights automatically. Audio and transcription stay on your machine.
 
 Optional CLI installer. It runs the same OpenCode plugin install command and pre-downloads the managed engine:
 
@@ -42,20 +42,28 @@ Optional CLI installer. It runs the same OpenCode plugin install command and pre
 npx @hxnnxs/opencode-voice install
 ```
 
+Update an installed plugin to the latest published version, then restart OpenCode:
+
+```bash
+npx @hxnnxs/opencode-voice update
+```
+
+Add `--global` if the plugin was installed in OpenCode's global configuration.
+
 Do not clone the repo unless you want to develop the plugin.
 
 > [!TIP]
-> First launch opens a model picker. Choose a Whisper model, let it download, then use `ctrl+r` to dictate into the prompt.
+> First launch opens a model picker. Choose a local model, let it download, then use `ctrl+r` to dictate into the prompt.
 
-### Requirements
+## What It Installs
 
 The plugin manages the STT engine and models:
 
-- downloads `whisper.cpp` from the opencode-voice GitHub Release registry
-- stores it in `~/.cache/opencode-voice/engines/whisper.cpp/<platform>-<arch>/`
-- downloads the selected Whisper model on first setup
+- downloads `whisper.cpp` or the Rust `transcribe-cpp` sidecar from the opencode-voice GitHub Release registry
+- stores each runtime in `~/.cache/opencode-voice/engines/<engine>/<platform>-<arch>/`
+- downloads the selected model on first setup
 
-Manual `whisper-cli` install is optional. If a local binary already exists, `opencode-voice` can still import or use it.
+Manual runtime installation is optional. Existing `whisper-cli` or `opencode-voice-transcribe` binaries can also be imported through the CLI.
 
 Check your machine:
 
@@ -63,13 +71,14 @@ Check your machine:
 npx @hxnnxs/opencode-voice doctor
 ```
 
-Install the managed engine without opening OpenCode:
+Install or inspect a managed runtime without opening OpenCode:
 
 ```bash
-npx @hxnnxs/opencode-voice engine install whisper.cpp
+npx @hxnnxs/opencode-voice engine install transcribe-cpp
+npx @hxnnxs/opencode-voice engine status transcribe-cpp
 ```
 
-### Usage
+## Use It
 
 Commands:
 
@@ -85,11 +94,15 @@ ctrl+r -> start recording
 ctrl+r -> stop, transcribe, and append
 ```
 
-Hold-to-talk is disabled by default because terminal release events vary by terminal. You can still configure a hold hotkey in `/voice-settings`.
+In `/voice-settings` -> **Recording**, choose one **Record key**. Toggle recording starts on the first press and transcribes on the second. Hold-to-talk is shown as unavailable until OpenCode exposes terminal key-release events to TUI plugins.
 
-### Models
+Settings also let you select a microphone, language, model, download location, and whether `/voice` submits the prompt after transcription.
 
-Available now through `whisper.cpp`:
+## Models
+
+The picker includes 19 `whisper.cpp` GGML choices and 68 ASR GGUF models from Handy's `transcribe.cpp` catalog. Pick one model at a time; only that model is downloaded.
+
+Useful `whisper.cpp` starting points:
 
 | Model                | Size   | Notes                         |
 | -------------------- | ------ | ----------------------------- |
@@ -103,15 +116,33 @@ Available now through `whisper.cpp`:
 | Whisper Turbo        | 1.5 GB | large, faster than full large |
 | Whisper Large Q5_0   | 1.0 GB | accurate, slower              |
 
-Model downloads support resume, retry, progress, and SHA256 verification. The standard Whisper variants offered by Handy are available here in `whisper.cpp` GGML form, alongside compact quantizations. Handy's other catalog entries use `transcribe-cpp` architectures such as Parakeet, Moonshine, Canary, GigaAM, and Breeze-ASR; they need a separate runtime and remain planned.
+The managed `transcribe-cpp` sidecar provides these Handy catalog families. Diarization and VAD assets are excluded because they do not produce text through the transcription runtime.
 
-Planned sidecar models:
+| Model | Size | Notes |
+| --- | --- | --- |
+| Parakeet, Nemotron, GigaAM | varies | English, multilingual, and Russian models |
+| Moonshine | varies | English plus language-specific variants |
+| Canary, Cohere, SenseVoice, Fun-ASR | varies | multilingual and specialized recognizers |
+| Whisper, Breeze, Voxtral, Qwen, Granite | varies | general-purpose and language-specialized models |
 
-- Parakeet V3
-- GigaAM v3
-- Moonshine V2 Small
+Model downloads support resume, retry, progress, and SHA256 verification. Sidecar catalog URLs are pinned to an upstream Hugging Face revision and their LFS SHA-256 digest, so a model cannot be activated until its expected artifact verifies.
 
-### Platform Status
+> [!NOTE]
+> Large models can require multiple gigabytes of disk space and significant memory. Start with Whisper Small, GigaAM V3 for Russian, or Parakeet for a fast GGUF option.
+
+## Troubleshooting
+
+Run diagnostics first:
+
+```bash
+npx @hxnnxs/opencode-voice doctor
+```
+
+- `Engine not found in registry: transcribe-cpp`: the installed plugin expects a release registry that does not yet include the sidecar. Update the plugin after its matching Engine Release is published, or locally import a built sidecar with `opencode-voice engine import transcribe-cpp <path>`.
+- `Could not start recorder` on Windows: open `/voice-settings` and select the enumerated microphone rather than relying on the system default. The error includes the exact `ffmpeg` command and stderr for diagnosis.
+- Hold-to-talk is unavailable: current OpenCode releases do not expose terminal key-release events to TUI plugins. Use the default `ctrl+r` toggle mode instead.
+
+## Platform Status
 
 | Platform | Status |
 | -------- | ------ |
@@ -119,7 +150,7 @@ Planned sidecar models:
 | macOS    | one-command engine/model install; recording uses `ffmpeg` AVFoundation until the native recorder sidecar ships |
 | Windows  | one-command engine/model/recorder install; recording uses DirectShow through a managed cached `ffmpeg.exe`, with system/bundled ffmpeg fallback |
 
-### Architecture
+## Architecture
 
 The package follows the public OpenCode TUI plugin shape used by community plugins.
 
@@ -133,32 +164,33 @@ Files:
 - `index.js` - TUI plugin entrypoint, commands, dialogs, keymap layer
 - `lib/models.js` - model registry, cache paths, default settings
 - `lib/download.js` - resumable model download and SHA256 verification
-- `lib/engine.js` - recorder selection, managed Windows recorder install, and `whisper-cli` transcription
+- `lib/engine.js` - recorder selection, managed Windows recorder install, and runtime-routed transcription
 - `lib/engines.js` - managed native engine download, status, import, and removal
+- `lib/handy-model-catalog.js` - pinned Handy GGUF model metadata
 - `bin/opencode-voice.js` - install wrapper and diagnostics CLI
+- `sidecar/` - Rust `transcribe-cpp` command-line runtime for GGUF models
 
-Voice input needs native audio and STT binaries. The JS plugin manages OpenCode UI, settings, engine/model downloads, and prompt insertion. A future native sidecar should replace shell recorders and add fast VAD plus Handy-style models.
+Voice input needs native audio and STT binaries. The JS plugin manages OpenCode UI, settings, model downloads, and prompt insertion. The managed Rust sidecar provides the `transcribe.cpp` runtime for supported GGUF model families.
 
-### Roadmap
+## Roadmap
 
-- publish managed `whisper-cli` release assets before npm release
 - Rust recorder sidecar with `cpal` and VAD
-- Parakeet, GigaAM, SenseVoice, Canary, and Moonshine model support
+- streaming transcription for sidecar models
 - Windows recorder stability and UX polish
-- faster streaming-style transcription
 
-### Development
+## Development
 
 Run checks:
 
 ```bash
 npm run check
 npm pack --dry-run
+cargo check --manifest-path sidecar/Cargo.toml
 ```
 
-This MVP has no build step.
+The JavaScript plugin has no frontend build step. The optional GGUF runtime is a Rust sidecar built by the Engine Release workflow.
 
-Development install from a checkout:
+Use the current checkout in OpenCode:
 
 ```bash
 git clone https://github.com/ihxnnxs/opencode-voice.git opencode-voice
@@ -166,15 +198,18 @@ cd opencode-voice
 opencode plugin "$(pwd)"
 ```
 
-### Project Status
+## Project Status
 
 This is an independent OpenCode plugin. It is not built by the OpenCode team and is not affiliated with OpenCode.
 
-### Credits
+## Credits
 
 - OpenCode wordmark SVG adapted from the public [OpenCode repository](https://github.com/anomalyco/opencode). The `voice` mark was added for this plugin.
-- Local transcription uses [`whisper.cpp`](https://github.com/ggml-org/whisper.cpp).
-- Model download metadata follows the local-first UX researched from [Handy](https://github.com/cjpais/Handy).
+- [Handy](https://github.com/cjpais/Handy) inspired the local-first model experience and supplies the curated `transcribe.cpp` model catalog this plugin pins and verifies.
+- Local Whisper transcription uses [`whisper.cpp`](https://github.com/ggml-org/whisper.cpp).
+- Handy GGUF transcription runs through the Rust [`transcribe-cpp`](https://crates.io/crates/transcribe-cpp) binding and its upstream `transcribe.cpp` runtime.
+- Recording and conversion rely on [FFmpeg](https://ffmpeg.org/) where the platform recorder requires it; managed distribution uses [`ffmpeg-static`](https://github.com/eugeneware/ffmpeg-static).
+- Model artifacts are hosted by [Hugging Face](https://huggingface.co/). Individual model creators and licenses remain those declared by each upstream model repository; their pinned source URLs are retained in `lib/handy-model-catalog.js`.
 
 ---
 

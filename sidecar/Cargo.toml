@@ -1,0 +1,17 @@
+[package]
+name = "opencode-voice-transcribe"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+publish = false
+
+[[bin]]
+name = "opencode-voice-transcribe"
+path = "src/main.rs"
+
+[dependencies]
+hound = "3.5"
+transcribe-cpp = { version = "0.1.3", default-features = false }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+transcribe-cpp = { version = "0.1.3", default-features = false, features = ["metal"] }

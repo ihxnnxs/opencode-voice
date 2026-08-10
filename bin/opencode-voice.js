@@ -15,11 +15,12 @@ function help() {
 
 Usage:
   opencode-voice install [--global] [--no-engine]
+  opencode-voice update [--global]
   opencode-voice doctor [--json]
-  opencode-voice engine status whisper.cpp [--json]
-  opencode-voice engine install whisper.cpp
-  opencode-voice engine import whisper.cpp [path-to-whisper-cli]
-  opencode-voice engine remove whisper.cpp
+  opencode-voice engine status <whisper.cpp|transcribe-cpp> [--json]
+  opencode-voice engine install <whisper.cpp|transcribe-cpp>
+  opencode-voice engine import <whisper.cpp|transcribe-cpp> [path-to-binary]
+  opencode-voice engine remove <whisper.cpp|transcribe-cpp>
 
 Development install from this checkout:
   opencode plugin <path-to-this-checkout>
@@ -98,6 +99,8 @@ async function doctor() {
     : {};
   const engine = getEngineStatus("whisper.cpp");
   const probe = engine.resolvedBinary ? await probeEngine("whisper.cpp", engine.resolvedBinary) : { ok: false, message: "missing binary" };
+  const sidecar = getEngineStatus("transcribe-cpp");
+  const sidecarProbe = sidecar.resolvedBinary ? await probeEngine("transcribe-cpp", sidecar.resolvedBinary) : { ok: false, message: "missing binary" };
   const recorder = getRecorderStatus(recorderOptions);
   const ffmpeg = recorderInstall?.resolvedBinary || resolveCommand("ffmpeg", recorderOptions);
   const arecord = resolveCommand("arecord", recorderOptions);
@@ -109,6 +112,8 @@ async function doctor() {
     recordingsDir: getAudioDir(),
     engine,
     probe,
+    sidecar,
+    sidecarProbe,
     recorder,
     recorders: {
       ffmpeg,
@@ -141,6 +146,9 @@ async function doctor() {
         `Managed engine dir: ${engine.managedDir}`,
         `whisper-cli: ${engine.resolvedBinary || "missing"}`,
         `Probe: ${probe.ok ? "ok" : probe.message}`,
+        `Sidecar source: ${sidecar.source}`,
+        `opencode-voice-transcribe: ${sidecar.resolvedBinary || "missing"}`,
+        `Sidecar probe: ${sidecarProbe.ok ? "ok" : sidecarProbe.message}`,
         `Recorder source: ${recorder.source}`,
         `Managed recorder dir: ${recorder.managedDir}`,
         `Managed recorder installed: ${recorder.managedInstalled ? "yes" : "no"}`,
@@ -160,7 +168,7 @@ async function engineCommand() {
   const [action, engineId = "whisper.cpp", maybePath] = args;
   const { getEngineStatus, importManagedEngine, installManagedEngine, removeManagedEngine } = await runtime();
 
-  if (engineId !== "whisper.cpp") {
+  if (!["whisper.cpp", "transcribe-cpp"].includes(engineId)) {
     console.error(`Unsupported engine: ${engineId}`);
     process.exit(1);
   }
@@ -268,7 +276,20 @@ async function installCommand() {
   }
 }
 
+function updateCommand() {
+  const pluginArgs = args.filter((arg) => arg === "--global");
+  const spawnOptions = { stdio: "inherit" };
+  if (process.platform === "win32") spawnOptions.shell = true;
+  const result = spawnSync("opencode", ["plugin", packageName(), "--force", ...pluginArgs], spawnOptions);
+  if (result.error) {
+    console.error(`Failed to run opencode: ${result.error.message}`);
+    process.exit(1);
+  }
+  if ((result.status ?? 1) !== 0) process.exit(result.status ?? 1);
+}
+
 if (command === "install") await installCommand();
+else if (command === "update") updateCommand();
 else if (command === "doctor") await doctor();
 else if (command === "engine") await engineCommand();
 else help();

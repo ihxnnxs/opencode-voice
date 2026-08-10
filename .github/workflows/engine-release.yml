@@ -47,6 +47,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Install Linux build dependencies
         if: startsWith(matrix.platform, 'linux')
         run: sudo apt-get update && sudo apt-get install -y build-essential cmake git
@@ -64,7 +67,15 @@ jobs:
         shell: bash
 
       - name: Package engine asset
-        run: node scripts/package-engine-asset.mjs --platform "${{ matrix.platform }}" --build build/whisper.cpp --out dist/engines --version "$WHISPER_CPP_REF"
+        run: node scripts/package-engine-asset.mjs --engine whisper.cpp --command whisper-cli --platform "${{ matrix.platform }}" --build build/whisper.cpp --out dist/engines --version "$WHISPER_CPP_REF"
+        shell: bash
+
+      - name: Build transcribe-cpp sidecar
+        run: cargo build --manifest-path sidecar/Cargo.toml --release
+        shell: bash
+
+      - name: Package transcribe-cpp sidecar
+        run: node scripts/package-engine-asset.mjs --engine transcribe-cpp --command opencode-voice-transcribe --platform "${{ matrix.platform }}" --binary "sidecar/target/release/opencode-voice-transcribe${{ startsWith(matrix.platform, 'win32') && '.exe' || '' }}" --out dist/engines --version "$(cargo metadata --manifest-path sidecar/Cargo.toml --no-deps --format-version 1 | node -e 'let s=""; process.stdin.on("data", d => s += d).on("end", () => process.stdout.write(JSON.parse(s).packages[0].dependencies.find(d => d.name === "transcribe-cpp").req.replace("^", "")))')"
         shell: bash
 
       - name: Upload engine artifact
@@ -103,7 +114,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.ENGINE_RELEASE_TAG }}
-          name: opencode-voice managed engine ${{ env.WHISPER_CPP_REF }}
+          name: opencode-voice managed engines
           files: |
             dist/engines/*.gz
             dist/engines/registry.json

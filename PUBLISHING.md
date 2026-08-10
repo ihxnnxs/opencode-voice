@@ -12,7 +12,7 @@ Before publishing:
 2. Keep the OpenCode plugin id as `opencode-voice` unless you want users to see a different plugin id.
 3. Confirm published install examples in all `README*.md` files use `@hxnnxs/opencode-voice`.
 4. Create the GitHub repository `ihxnnxs/opencode-voice` and push `main`.
-5. Run the **Engine Release** GitHub Actions workflow first. It must publish:
+5. Run the **Engine Release** GitHub Actions workflow first. It builds both `whisper-cli` and the Rust `opencode-voice-transcribe` sidecar for every platform, then publishes:
 
 ```txt
 https://github.com/ihxnnxs/opencode-voice/releases/download/v0.1.0/registry.json
@@ -30,7 +30,7 @@ npm publish --dry-run
 ## Release checklist
 
 - Confirm `bin/opencode-voice.js` is executable in `npm pack --dry-run --json` (`mode: 493`).
-- Confirm `opencode-voice engine install whisper.cpp` downloads and probes the managed engine from the release registry.
-- Confirm `opencode-voice doctor` reports a working managed engine probe.
+- Confirm `opencode-voice engine install whisper.cpp` and `opencode-voice engine install transcribe-cpp` download and probe managed engines from the release registry.
+- Confirm `opencode-voice doctor` reports both managed runtime probes.
 - Confirm model downloads write `.sha256` verification markers.
 - Tag the release after the GitHub Actions release check passes.

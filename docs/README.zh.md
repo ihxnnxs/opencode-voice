@@ -83,7 +83,7 @@ ctrl+r -> 开始录音
 ctrl+r -> 停止、转写并插入文本
 ```
 
-默认关闭 hold-to-talk，因为 terminal release events 在不同终端中表现不一致。你仍然可以在 `/voice-settings` 中配置 hold 快捷键。
+使用 `/voice-settings` -> **Recording** 配置一个录音快捷键。当前使用 toggle 模式：第一次按下开始录音，第二次按下停止、转写并插入文本。Hold-to-talk 需要 OpenCode 向 TUI 插件提供按键释放事件，因此目前不可用。
 
 ### 模型
 
@@ -98,11 +98,11 @@ ctrl+r -> 停止、转写并插入文本
 
 模型下载支持断点续传、重试、进度显示和 SHA256 校验。
 
-计划中的 sidecar 模型：
+通过 `transcribe-cpp` sidecar 可用的 Handy 模型系列：
 
-- Parakeet V3
-- GigaAM v3
-- Moonshine V2 Small
+- Parakeet、Nemotron、GigaAM
+- Moonshine、Canary、Cohere、SenseVoice、Fun-ASR
+- Whisper、Breeze、Voxtral、Qwen、Granite
 
 ### 平台状态
 
@@ -166,8 +166,11 @@ opencode plugin "$(pwd)"
 ### 鸣谢
 
 - OpenCode wordmark SVG 改编自公开的 [OpenCode repository](https://github.com/anomalyco/opencode)。`voice` 标记为本插件新增。
-- 本地转写使用 [`whisper.cpp`](https://github.com/ggml-org/whisper.cpp)。
-- 模型下载 metadata 参考了 [Handy](https://github.com/cjpais/Handy) 的 local-first UX。
+- [Handy](https://github.com/cjpais/Handy) 启发了 local-first 模型体验，并提供本插件固定版本并验证的 `transcribe.cpp` 模型目录。
+- 本地 Whisper 转写使用 [`whisper.cpp`](https://github.com/ggml-org/whisper.cpp)。
+- Handy GGUF 模型通过 Rust binding [`transcribe-cpp`](https://crates.io/crates/transcribe-cpp) 及其 upstream `transcribe.cpp` runtime 运行。
+- 平台需要时，录音和转换使用 [FFmpeg](https://ffmpeg.org/)；managed 分发使用 [`ffmpeg-static`](https://github.com/eugeneware/ffmpeg-static)。
+- 模型文件由 [Hugging Face](https://huggingface.co/) 托管。每个模型的作者和许可证以其 upstream 仓库声明为准；固定的源 URL 保留在 `lib/handy-model-catalog.js` 中。
 
 ---
 

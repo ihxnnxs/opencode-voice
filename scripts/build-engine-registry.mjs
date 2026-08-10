@@ -13,14 +13,23 @@ const dir = path.resolve(args.dir || "dist/engines");
 const repo = args.repo || process.env.GITHUB_REPOSITORY || "ihxnnxs/opencode-voice";
 const tag = args.tag || process.env.ENGINE_RELEASE_TAG || "v0.1.0";
 const version = args.version || process.env.WHISPER_CPP_REF || tag;
-const assets = {};
+const assetBase = args.assetBase || process.env.ENGINE_ASSET_BASE || `https://github.com/${repo}/releases/download/${tag}`;
+const engines = {};
 
 for (const entry of fs.readdirSync(dir)) {
   if (!entry.endsWith(".json") || entry === "registry.json") continue;
   const metadata = JSON.parse(fs.readFileSync(path.join(dir, entry), "utf8"));
-  assets[metadata.platform] = {
+  const engine = engines[metadata.engineId || "whisper.cpp"] ||= {
+    id: metadata.engineId || "whisper.cpp",
+    kind: "cli",
+    displayName: metadata.command || "whisper-cli",
+    command: metadata.command || "whisper-cli",
+    version: metadata.version || version,
+    assets: {},
+  };
+  engine.assets[metadata.platform] = {
     kind: metadata.kind,
-    url: `https://github.com/${repo}/releases/download/${tag}/${metadata.assetName}`,
+    url: `${assetBase.replace(/\/$/, "")}/${metadata.assetName}`,
     size: metadata.size,
     sha256: metadata.sha256,
     binary: metadata.binary,
@@ -31,22 +40,9 @@ const registry = {
   schema: "opencode-voice.engines.v1",
   generatedAt: new Date().toISOString(),
   version,
-  engines: {
-    "whisper.cpp": {
-      id: "whisper.cpp",
-      kind: "cli",
-      displayName: "whisper.cpp whisper-cli",
-      command: "whisper-cli",
-      version,
-      upstream: {
-        repo: "ggml-org/whisper.cpp",
-        ref: version,
-      },
-      assets,
-    },
-  },
+  engines,
 };
 
 await fs.promises.mkdir(dir, { recursive: true });
 await fs.promises.writeFile(path.join(dir, "registry.json"), `${JSON.stringify(registry, null, 2)}\n`);
-console.log(`registry.json with ${Object.keys(assets).length} assets`);
+console.log(`registry.json with ${Object.keys(engines).length} engines`);

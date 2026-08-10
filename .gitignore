@@ -14,7 +14,7 @@ models/
 *.flac
 
 # Native sidecar build output
-target/
+**/target/
 
 # OS/editor files
 .DS_Store

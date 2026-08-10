@@ -166,8 +166,11 @@ Este es un OpenCode plugin independiente. No está construido por el equipo de O
 ### Créditos
 
 - OpenCode wordmark SVG adaptado del [OpenCode repository](https://github.com/anomalyco/opencode). La marca `voice` se añadió para este plugin.
-- La transcripción local usa [`whisper.cpp`](https://github.com/ggml-org/whisper.cpp).
-- La metadata de descarga de modelos sigue el UX local-first investigado en [Handy](https://github.com/cjpais/Handy).
+- [Handy](https://github.com/cjpais/Handy) inspiró la experiencia local-first y aporta el catálogo de modelos `transcribe.cpp` que este plugin fija y verifica.
+- La transcripción local de Whisper usa [`whisper.cpp`](https://github.com/ggml-org/whisper.cpp).
+- Los modelos GGUF de Handy se ejecutan mediante el binding Rust [`transcribe-cpp`](https://crates.io/crates/transcribe-cpp) y su runtime upstream `transcribe.cpp`.
+- La grabación y conversión usan [FFmpeg](https://ffmpeg.org/) cuando la plataforma lo necesita; la distribución managed usa [`ffmpeg-static`](https://github.com/eugeneware/ffmpeg-static).
+- Los artefactos de modelos están alojados en [Hugging Face](https://huggingface.co/). Los autores y licencias de cada modelo son los declarados en su repositorio upstream; las URL de origen fijadas se conservan en `lib/handy-model-catalog.js`.
 
 ---
 

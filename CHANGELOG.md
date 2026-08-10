@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0 - 2026-08-10
+
+### Added
+
+- Added the managed Rust `transcribe-cpp` sidecar and 68 verified GGUF ASR models from Handy's catalog, including GigaAM, Parakeet, Moonshine, Canary, SenseVoice, Qwen, Voxtral, and Granite families.
+- Added managed engine install, status, import, remove, and diagnostics support for both `whisper.cpp` and `transcribe-cpp`.
+- Added `opencode-voice update` to update an installed plugin.
+
+### Changed
+
+- Reorganized voice settings around one recording key and grouped transcription and system settings.
+- Hold-to-talk is now shown as unavailable until OpenCode exposes reliable terminal key-release events to TUI plugins.
+
+### Fixed
+
 - Fixed Windows recorder startup to try DirectShow's enumerated microphone names when no microphone is configured. DirectShow's `audio=default` alias is retained only as a final fallback because it is not reliably supported.
 - Expanded recorder startup errors with the exact `ffmpeg` command and captured `ffmpeg` stderr to make Windows microphone failures actionable.
 - Added standard Handy-equivalent Whisper variants plus verified Tiny, Base, Small, Medium, and Turbo GGML quantizations to the local Whisper model picker.

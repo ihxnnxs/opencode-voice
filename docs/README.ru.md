@@ -166,8 +166,11 @@ opencode plugin "$(pwd)"
 ### Кредиты
 
 - OpenCode wordmark SVG адаптирован из публичного [OpenCode repository](https://github.com/anomalyco/opencode). Метка `voice` добавлена для этого плагина.
-- Локальная транскрибация использует [`whisper.cpp`](https://github.com/ggml-org/whisper.cpp).
-- Metadata загрузки моделей следует local-first UX, изученному в [Handy](https://github.com/cjpais/Handy).
+- [Handy](https://github.com/cjpais/Handy) вдохновил local-first UX и предоставляет каталог моделей `transcribe.cpp`, который плагин закрепляет по ревизии и проверяет.
+- Локальная транскрибация Whisper использует [`whisper.cpp`](https://github.com/ggml-org/whisper.cpp).
+- GGUF-модели Handy работают через Rust binding [`transcribe-cpp`](https://crates.io/crates/transcribe-cpp) и его upstream runtime `transcribe.cpp`.
+- Для записи и конвертации там, где это требуется платформе, используется [FFmpeg](https://ffmpeg.org/); managed-дистрибуция использует [`ffmpeg-static`](https://github.com/eugeneware/ffmpeg-static).
+- Артефакты моделей размещены на [Hugging Face](https://huggingface.co/). Авторы и лицензии каждой модели определяются её upstream-репозиторием; закреплённые URL источников сохранены в `lib/handy-model-catalog.js`.
 
 ---
 

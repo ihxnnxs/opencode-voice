@@ -17,17 +17,17 @@ function sha256(buffer) {
   return createHash("sha256").update(buffer).digest("hex");
 }
 
-function findBinary(dir) {
+function findBinary(dir, binaryName) {
   const stack = [dir];
   while (stack.length) {
     const current = stack.pop();
     for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
       const file = path.join(current, entry.name);
       if (entry.isDirectory()) stack.push(file);
-      if (entry.isFile() && (entry.name === "whisper-cli" || entry.name === "whisper-cli.exe")) return file;
+      if (entry.isFile() && (entry.name === binaryName || entry.name === `${binaryName}.exe`)) return file;
     }
   }
-  throw new Error(`whisper-cli binary not found under ${dir}`);
+  throw new Error(`${binaryName} binary not found under ${dir}`);
 }
 
 const args = parseArgs();
@@ -35,9 +35,11 @@ const platform = args.platform || `${process.platform}-${process.arch}`;
 const buildDir = path.resolve(args.build || "build");
 const outDir = path.resolve(args.out || "dist/engines");
 const version = args.version || "unknown";
-const binaryPath = args.binary ? path.resolve(args.binary) : findBinary(buildDir);
-const binaryName = process.platform === "win32" || binaryPath.endsWith(".exe") ? "whisper-cli.exe" : "whisper-cli";
-const assetName = `whisper-cli-${platform}.gz`;
+const engineId = args.engine || "whisper.cpp";
+const command = args.command || (engineId === "whisper.cpp" ? "whisper-cli" : "opencode-voice-transcribe");
+const binaryPath = args.binary ? path.resolve(args.binary) : findBinary(buildDir, command);
+const binaryName = process.platform === "win32" || binaryPath.endsWith(".exe") ? `${command}.exe` : command;
+const assetName = `${command}-${platform}.gz`;
 
 await fs.promises.mkdir(outDir, { recursive: true });
 
@@ -47,6 +49,8 @@ await fs.promises.writeFile(path.join(outDir, assetName), archive);
 
 const metadata = {
   platform,
+  engineId,
+  command,
   assetName,
   version,
   kind: "single-binary-gzip",
@@ -60,5 +64,5 @@ const metadata = {
   },
 };
 
-await fs.promises.writeFile(path.join(outDir, `whisper-cli-${platform}.json`), `${JSON.stringify(metadata, null, 2)}\n`);
+await fs.promises.writeFile(path.join(outDir, `${command}-${platform}.json`), `${JSON.stringify(metadata, null, 2)}\n`);
 console.log(`${assetName} ${metadata.sha256}`);
