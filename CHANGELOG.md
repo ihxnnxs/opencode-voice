@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 - 2026-08-16
+
+### Fixed
+
+- Added the required no-op server export so the TUI plugin loads in OpenCode 1.18 and later.
+
 ## 0.2.0 - 2026-08-10
 
 ### Added

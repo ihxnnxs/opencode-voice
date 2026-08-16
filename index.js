@@ -961,6 +961,9 @@ function buildCommands(ctx) {
 
 const plugin = {
   id: PLUGIN_ID,
+  // OpenCode 1.18 validates every plugin module through its server contract,
+  // even when the plugin only contributes TUI commands.
+  server: async () => ({}),
   tui: async (api, options = {}) => {
     const runtime = new VoiceRuntime(options || {});
     const ctx = {
