@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2 - 2026-08-16
+
+### Fixed
+
+- Restored the TUI-only plugin export required by OpenCode 1.18.
+
 ## 0.2.1 - 2026-08-16
 
 ### Fixed
