@@ -1,6 +1,6 @@
 {
   "name": "@hxnnxs/opencode-voice",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Local voice input plugin for OpenCode",
   "type": "module",
   "license": "MIT",

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3 - 2026-08-17
+
+### Fixed
+
+- Repaired unfinalized WAV headers before transcription so recordings interrupted by forced recorder termination remain usable.
+
 ## 0.2.2 - 2026-08-16
 
 ### Fixed
